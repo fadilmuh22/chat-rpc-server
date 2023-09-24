@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+package main;
+
+option go_package = "./";
+
 message ChatMessage {
     string from = 1;
     string msg = 2;
@@ -29,6 +33,6 @@ message ReceiveMsgRequest {
 service ChatService {
     rpc join(User) returns (JoinResponse) {}
     rpc sendMsg(ChatMessage) returns (Empty) {}
-    rpc receiveMsg(Empty) returns (stream ChatMessage) {}
+    rpc receiveMsg(ReceiveMsgRequest) returns (stream ChatMessage) {}
     rpc getAllUsers(Empty) returns (UserList) {}
 }
