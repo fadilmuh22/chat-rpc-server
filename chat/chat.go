@@ -22,7 +22,7 @@ func (s *ChatService) Join(ctx context.Context, user *chatv1.User) (*chatv1.Join
 	defer s.userMutex.Unlock()
 
 	// Initialize the clients map if it's nil.
-	if s.clients == nil {
+	if s.clients == nil || len(s.clients) == 0 {
 		s.clients = make(map[string]chan *chatv1.ChatMessage)
 	}
 
@@ -59,13 +59,13 @@ func (s *ChatService) ReceiveMsg(req *chatv1.ReceiveMsgRequest, stream chatv1.Ch
 		select {
 		case msg := <-clientChan:
 			// Send the received message to the client.
-			if err := stream.SendMsg(msg); err != nil {
+			if err := stream.Send(msg); err != nil {
 				return err
 			}
 		case <-stream.Context().Done():
 			// Client disconnected, remove the channel and exit.
 			delete(s.clients, req.User)
-			return nil
+			return stream.Context().Err()
 		}
 	}
 }
